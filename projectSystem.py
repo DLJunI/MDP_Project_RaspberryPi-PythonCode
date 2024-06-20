@@ -8,6 +8,9 @@
 
 # patch note {
 #    2024.06.04 Create an integrated project [Ver 1.0]
+#    2024.06.18 Change " LED_PIN " variable name -> "LED_CONTROL_PIN" [Ver 1.0.1]
+#    2024.06.20 Modified to LED control code using gpiozero due to RPi.GPIO unavailability [Ver 1.1.1]
+#
 #}
 
 # ---------- import zone [Start] ----------
@@ -15,14 +18,18 @@ from flask import Flask, send_file
 import subprocess
 import os
 from PIL import Image
-import RPi.GPIO as GPIO
+import gpiozero
 # ---------- import zone [End] ----------
 
+
 # ---------- GPIO Setup [Start] ----------
-LED_PIN = 18
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(LED_PIN, GPIO.OUT)
+LED_CONTROL_PIN = gpiozero.LED(18)
 # ---------- GPIO Setup [End] ----------
+
+
+# ---------- LED Operation define zone [Start] ----------
+# ---------- LED Operation define zone [END] ----------
+
 
 # ---------- Flask Route and function define zone [Start] ----------
 app = Flask(__name__)
@@ -61,7 +68,7 @@ def capture_image():
 @app.route('/led/on', methods=['GET'])
 def led_on():
     try:
-        GPIO.output(LED_PIN, GPIO.HIGH)
+        LED_CONTROL_PIN.on()
         return "LED is ON"
     except Exception as e:
         return f"An error occurred while turning on the LED: {e}"
@@ -69,13 +76,13 @@ def led_on():
 @app.route('/led/off', methods=['GET'])
 def led_off():
     try:
-        GPIO.output(LED_PIN, GPIO.LOW)
+        LED_CONTROL_PIN.off()
         return "LED is OFF"
     except Exception as e:
         return f"An error occurred while turning off the LED: {e}"
+# ---------- Flask Route and function define zone [End] ----------
 
-#Here is main and you can see that  
-#ip is automatically set to Raspberry Pi by setting it to "host = 0.0.0.0.".
+#Here's main
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
-# ---------- Flask Route and function define zone [End] ----------
+
