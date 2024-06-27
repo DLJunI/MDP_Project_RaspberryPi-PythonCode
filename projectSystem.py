@@ -10,6 +10,7 @@
 #    2024.06.04 Create an integrated project [Ver 1.0]
 #    2024.06.18 Change " LED_PIN " variable name -> "LED_CONTROL_PIN" [Ver 1.0.1]
 #    2024.06.20 Modified to LED control code using gpiozero due to RPi.GPIO unavailability [Ver 1.1.1]
+#    2024.06.27 add servomotor control code for open/close [Ver 1.2.0]
 #
 #}
 
@@ -21,18 +22,34 @@ from PIL import Image
 import gpiozero
 # ---------- import zone [End] ----------
 
+# ---------- import zone [Start] ----------
+from flask import Flask, send_file
+import subprocess
+import os
+from PIL import Image
+import gpiozero
+# ---------- import zone [End] ----------
 
 # ---------- GPIO Setup [Start] ----------
 LED_CONTROL_PIN = gpiozero.LED(18)
+SERVO_MOTOR_PIN = 2
+
+servo1 = gpiozero.Servo(SERVO_MOTOR_PIN, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
 # ---------- GPIO Setup [End] ----------
 
-
-# ---------- LED Operation define zone [Start] ----------
-# ---------- LED Operation define zone [END] ----------
-
+# ---------- Operation define zone [Start] ----------
+def setServoAngle(servo, current_angle, target_angle):
+    if abs(target_angle - current_angle) < 30:
+        return current_angle  # 占쏙옙화占쏙옙占쏙옙 30占쏙옙 占싱몌옙占쏙옙 占쏙옙占?占쏙옙占쏙옙 占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙
+    
+    servo.value = (target_angle / 90) - 1
+    return target_angle
+# ---------- Operation define zone [End] ----------
 
 # ---------- Flask Route and function define zone [Start] ----------
 app = Flask(__name__)
+
+current_angle = 90  # 占쏙옙占쏙옙 占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙占싹깍옙 占쏙옙占쏙옙 占쏙옙占쏙옙 占십깍옙화
 
 @app.route('/capture', methods=['GET'])
 def capture_image():
@@ -80,9 +97,28 @@ def led_off():
         return "LED is OFF"
     except Exception as e:
         return f"An error occurred while turning off the LED: {e}"
+
+@app.route('/door/open', methods=['GET'])
+def door_open():
+    global current_angle
+    try:
+        current_angle = setServoAngle(servo1, current_angle, 10)
+        return "Door is opened"
+    except Exception as e:
+        return f"An error occurred while opening the door: {e}"
+
+@app.route('/door/close', methods=['GET'])
+def door_close():
+    global current_angle
+    try:
+        current_angle = setServoAngle(servo1, current_angle, 90)
+        return "Door is closed"
+    except Exception as e:
+        return f"An error occurred while closing the door: {e}"
 # ---------- Flask Route and function define zone [End] ----------
 
-#Here's main
+# Here's main
 if __name__ == '__main__':
+    current_angle = setServoAngle(servo1, 90, 90)
     app.run(host='0.0.0.0', port=5000)
-
+    
