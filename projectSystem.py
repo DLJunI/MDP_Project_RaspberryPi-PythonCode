@@ -39,8 +39,8 @@ servo1 = gpiozero.Servo(SERVO_MOTOR_PIN, min_pulse_width=0.5/1000, max_pulse_wid
 
 # ---------- Operation define zone [Start] ----------
 def setServoAngle(servo, current_angle, target_angle):
-    if abs(target_angle - current_angle) < 30:
-        return current_angle  # 占쏙옙화占쏙옙占쏙옙 30占쏙옙 占싱몌옙占쏙옙 占쏙옙占?占쏙옙占쏙옙 占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙
+    if abs(target_angle - current_angle) < 50:
+        return current_angle
     
     servo.value = (target_angle / 90) - 1
     return target_angle
@@ -49,7 +49,7 @@ def setServoAngle(servo, current_angle, target_angle):
 # ---------- Flask Route and function define zone [Start] ----------
 app = Flask(__name__)
 
-current_angle = 90  # 占쏙옙占쏙옙 占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙占싹깍옙 占쏙옙占쏙옙 占쏙옙占쏙옙 占십깍옙화
+current_angle = 90
 
 @app.route('/capture', methods=['GET'])
 def capture_image():
